@@ -86,7 +86,6 @@ export default (props: GroupCallProps): JSX.Element => {
 
   useEffect(() => {
     if (isSignalRReady && connection !== undefined) {
-      debugger;
       connection.startListen("newMessage", memoizedCallback);
 
       return () => {
