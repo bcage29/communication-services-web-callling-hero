@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import ConfigurationScreen, { ConfigurationScreenProps, TokenResponse } from '../components/Configuration';
 import { setCallAgent, setGroup } from '../core/actions/calls';
 import { setVideoDeviceInfo, setAudioDeviceInfo } from '../core/actions/devices';
-import { initCallClient, joinGroup, registerToCallAgent, updateDevices } from '../core/sideEffects';
+import { initCallClient, joinGroup, joinTeamsMeeting, registerToCallAgent, updateDevices } from '../core/sideEffects';
 import { setMic } from '../core/actions/controls';
 import { State } from '../core/reducers';
 import {
@@ -18,6 +18,7 @@ import { AzureCommunicationTokenCredential } from '@azure/communication-common';
 import { setUserId } from 'core/actions/sdk';
 
 const mapStateToProps = (state: State, props: ConfigurationScreenProps) => ({
+  user: state.login.user,
   deviceManager: state.devices.deviceManager,
   callAgent: state.calls.callAgent,
   group: state.calls.group,
@@ -35,6 +36,21 @@ const mapStateToProps = (state: State, props: ConfigurationScreenProps) => ({
         callAgent,
         {
           groupId
+        },
+        {
+          videoOptions: {
+            localVideoStreams: localVideoStream ? [localVideoStream] : undefined
+          },
+          audioOptions: { muted: !state.controls.mic }
+        }
+      ));
+  },
+  joinTeamsMeeting: async (callAgent: CallAgent, meetingLink: string, localVideoStream: LocalVideoStream): Promise<void> => {
+    callAgent &&
+      (await joinTeamsMeeting(
+        callAgent,
+        {
+          meetingLink
         },
         {
           videoOptions: {

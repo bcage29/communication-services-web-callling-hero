@@ -8,6 +8,8 @@ const CALL_REMOVED = 'CALL_REMOVED';
 const SET_CALL_STATE = 'SET_CALL_STATE';
 const SET_PARTICIPANTS = 'SET_PARTICIPANTS';
 const SET_DOMINANT_PARTICIPANTS = 'SET_DOMINANT_PARTICIPANTS';
+const SET_MOVE_PARTICIPANT = 'SET_MOVE_PARTICIPANT';
+const SET_LEAVING_CALL_ID = 'SET_LEAVING_CALL_ID';
 
 interface SetCallAgentAction {
   type: typeof SET_CALL_AGENT;
@@ -44,6 +46,16 @@ interface SetParticipantsAction {
 interface SetDominantParticipantsAction {
   type: typeof SET_DOMINANT_PARTICIPANTS;
   dominantParticipants: SelectionState[];
+}
+
+interface SetMoveParticipantAction {
+  type: typeof SET_MOVE_PARTICIPANT;
+  teamsMeetingUrl: string;
+}
+
+interface SetLeavingCallIdAction {
+  type: typeof SET_LEAVING_CALL_ID;
+  callId: string;
 }
 
 export const setCallAgent = (callAgent: CallAgent): SetCallAgentAction => {
@@ -97,6 +109,22 @@ export const setDominantParticipants = (selected: SelectionState[]): SetDominant
   };
 };
 
+export const setMoveParticipant = (teamsMeetingUrl: string): SetMoveParticipantAction => {
+  return {
+    type: SET_MOVE_PARTICIPANT,
+    teamsMeetingUrl: teamsMeetingUrl
+  };
+};
+
+export const setLeavingCallId = (callId: string): SetLeavingCallIdAction => {
+  return {
+    type: SET_LEAVING_CALL_ID,
+    callId: callId
+  };
+};
+
+
+
 export {
   SET_CALL_AGENT,
   SET_GROUP,
@@ -104,7 +132,9 @@ export {
   CALL_REMOVED,
   SET_CALL_STATE,
   SET_DOMINANT_PARTICIPANTS,
-  SET_PARTICIPANTS
+  SET_PARTICIPANTS,
+  SET_MOVE_PARTICIPANT,
+  SET_LEAVING_CALL_ID
 };
 
 export type CallTypes =
@@ -114,4 +144,6 @@ export type CallTypes =
   | SetCallStateAction
   | SetGroupAction
   | CallAddedAction
-  | CallRemovedAction;
+  | CallRemovedAction
+  | SetMoveParticipantAction
+  | SetLeavingCallIdAction;

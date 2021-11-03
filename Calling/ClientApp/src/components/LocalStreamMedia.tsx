@@ -10,6 +10,7 @@ import staticMediaSVG from '../assets/staticmedia.svg';
 export interface LocalStreamMediaProps {
   label: string;
   stream: LocalVideoStream;
+  isOnHold: boolean;
 }
 
 export default (props: LocalStreamMediaProps): JSX.Element => {
@@ -29,7 +30,19 @@ export default (props: LocalStreamMediaProps): JSX.Element => {
     }
   };
 
-  const { stream, label } = props;
+  const imagePropsHold = {
+    src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAACQUlEQVRoge3YPWsUURTG8V+MphANijGFCzYiKIJgo0YFXwobwW9gZymkM42indrYBNKmsfEDWCromhSWImqwESQKiY0YJQY1FtfBuOzM3Nnd2dnA/OE0c+eeeZ6ZuefMHWpqamoGle2YwWesp8QPNHGsIo2ZzEgX3hqfsKsameksizewjsuReefazG0WGI9mtaCByci8afNjx/9jS8aFvkYKShgreH5PyDKwUjDXwBlYLpjrQDdCOiXLwLuCuSawrQstHZFlYKFgrh0q6AdZBl53kO9Up0I6JctAU0b5SmF3F1pK4ZX4PvALxyNy9q0PwOMIQQn38KLA+X3htLi7Py++AvX0CcSwkCN+CY0C+fr6CsGDjLHfuILFiDwJz9scaxYYL8xefNP+rnwU9g2VMRxxznfBxMk2YzsxhCe9FFUGDcFI2q7scHXS4rkpfYHNYaQ6aXGM4K10E7PVSYvnvNBx00xM9VtQzCLeyPu/c86mjF/AmvalsJUTuIqj+Cn0k64aVizDQtXJam6z0tfEVtwVesjGOV/wCNO4hWu4hNEyTIzhTY6JeRxpmdfAs5x5rbEoPKWesx8fci6+hjtCs7vo32tSNJ6WYYBQ//NMJB07a/HnxWpZBmAfXnYhLjZKZY/8hT3QBgjfRFNCSdyUBhLOyd9DDLQBwu5sUvg9uSkNJIzjttCkNqWBhDHc0PmrtdR/yelM4L5Qels/J9JiOi3ZUMli8xjHGaEhHsJBYfc3KvyqXMFDXBc2VDU1NTUDxh/vRr1pAP/DKAAAAABJRU5ErkJggg==",
+    imageFit: ImageFit.contain,
+    styles: {
+      root: {
+        width: '100%',
+        height: '100%',
+        display: activeStreamBeingRendered ? 'none' : 'block'
+      }
+    }
+  };
+
+  const { stream, label, isOnHold } = props;
 
   useEffect(() => {
     (async (): Promise<void> => {
@@ -67,7 +80,9 @@ export default (props: LocalStreamMediaProps): JSX.Element => {
         className={localVideoContainerStyle}
         id={Constants.LOCAL_VIDEO_PREVIEW_ID}
       />
-      <Image {...imageProps} />
+      {
+        !isOnHold ? <Image { ...imageProps } /> : <Image { ...imagePropsHold } />
+      }
       <Label className={videoHint}>{label}</Label>
     </div>
   );

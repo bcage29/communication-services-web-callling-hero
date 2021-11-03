@@ -19,6 +19,7 @@ export interface MediaGalleryProps {
   remoteParticipants: RemoteParticipant[];
   localVideoStream: LocalVideoStream;
   dominantParticipants: SelectionState[];
+  isOnHold: boolean;
 }
 
 export default (props: MediaGalleryProps): JSX.Element => {
@@ -63,7 +64,7 @@ export default (props: MediaGalleryProps): JSX.Element => {
     // for now we will always add the local user to the main stage
     const localParticipantMediaGalleryItem = (
       <div key="localParticipantTile" className={mediaGalleryStyle}>
-        <LocalStreamMedia label={displayName} stream={props.localVideoStream} />
+        <LocalStreamMedia label={displayName} stream={props.localVideoStream} isOnHold={props.isOnHold} />
       </div>
     );
 

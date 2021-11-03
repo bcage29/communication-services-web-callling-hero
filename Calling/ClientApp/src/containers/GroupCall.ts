@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
 import GroupCall, { GroupCallProps } from '../components/GroupCall';
-import { setMicrophone } from '../core/sideEffects';
+import { setMicrophone, moveParticipant } from '../core/sideEffects';
 import { setVideoDeviceInfo, setAudioDeviceInfo } from '../core/actions/devices';
-import { AudioDeviceInfo, VideoDeviceInfo } from '@azure/communication-calling';
+//import { setMoveParticipant } from '../core/actions/calls';
+import { AudioDeviceInfo, LocalVideoStream, VideoDeviceInfo } from '@azure/communication-calling';
 import { State } from '../core/reducers';
 
 const mapStateToProps = (state: State, props: GroupCallProps) => ({
@@ -36,7 +37,10 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
   setVideoDeviceInfo: (deviceInfo: VideoDeviceInfo): void => {
     dispatch(setVideoDeviceInfo(deviceInfo));
-  }
+  },
+  setMoveParticipant: (teamsMeetingUrl: string): void => {
+    dispatch(moveParticipant(teamsMeetingUrl));
+  },
 });
 
 const connector: any = connect(mapStateToProps, mapDispatchToProps);

@@ -5,11 +5,13 @@ import { streamsReducer, StreamsState } from './streams';
 import { controlsReducer, ControlsState } from './controls';
 import { SdkState, sdkReducer } from './sdk';
 import { CallsState, callsReducer } from './calls';
+import { LoginState, loginReducer } from './login';
 import { CallTypes } from '../actions/calls';
 import { ControlTypes } from '../actions/controls';
 import { DeviceTypes } from '../actions/devices';
 import { SdkTypes } from '../actions/sdk';
 import { StreamTypes } from '../actions/streams';
+import { LoginTypes } from 'core/actions/login';
 
 export interface ParticipantStream {
   user: RemoteParticipant;
@@ -22,14 +24,16 @@ export interface State {
   streams: StreamsState;
   controls: ControlsState;
   sdk: SdkState;
+  login: LoginState;
 }
 
-type AppTypes = CallTypes | ControlTypes | DeviceTypes | SdkTypes | StreamTypes;
+type AppTypes = CallTypes | ControlTypes | DeviceTypes | SdkTypes | StreamTypes | LoginTypes;
 
 export const reducer: Reducer<State, AppTypes> = combineReducers({
   calls: callsReducer,
   devices: devicesReducer,
   streams: streamsReducer,
   controls: controlsReducer,
-  sdk: sdkReducer
+  sdk: sdkReducer,
+  login: loginReducer
 });

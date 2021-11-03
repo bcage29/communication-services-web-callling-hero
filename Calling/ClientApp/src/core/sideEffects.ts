@@ -11,12 +11,13 @@ import {
   CallAgent,
   CallClient,
   HangUpOptions,
-  CallEndReason
+  CallEndReason,
+  MeetingLocator
 } from '@azure/communication-calling';
 import { CommunicationUserKind } from '@azure/communication-common';
 import { Dispatch } from 'redux';
 import { utils } from '../Utils/Utils';
-import { callAdded, callRemoved, setCallState, setParticipants, setCallAgent } from './actions/calls';
+import { callAdded, callRemoved, setCallState, setParticipants, setCallAgent, setLeavingCallId } from './actions/calls';
 import { setMic, setShareScreen } from './actions/controls';
 import {
   setAudioDeviceInfo,
@@ -33,6 +34,32 @@ import { setLogLevel } from '@azure/logger';
 import RemoteStreamSelector from './RemoteStreamSelector';
 import { Constants } from './constants';
 import { setCallClient, setUserId } from './actions/sdk';
+
+
+// export const loginUser = (email: string) => {
+//   debugger;
+//   return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
+//     const state = getState();
+//     debugger;
+
+//     if (state === undefined || state.calls.call === undefined) {
+//       console.error('state or state.controls.mic is null');
+//       return;
+//     }
+
+//     try {
+//       if (!state.controls.mic) {
+//         await state.calls.call.unmute();
+//       } else {
+//         await state.calls.call.mute();
+//       }
+
+//       dispatch(setUser(mic));
+//     } catch (e) {
+//       console.error(e);
+//     }
+//   };
+// };
 
 export const setMicrophone = (mic: boolean) => {
   return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
@@ -53,6 +80,47 @@ export const setMicrophone = (mic: boolean) => {
       dispatch(setMic(mic));
     } catch (e) {
       console.error(e);
+    }
+  };
+};
+
+export const moveParticipant = (meetingLink: string) => {
+  return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
+    const state = getState();
+
+    if (state === undefined || state.calls.call === undefined) {
+      console.error('state or state.controls.mic is null');
+      return;
+    }
+
+    try {
+      // set current call to hold
+      dispatch(setLeavingCallId(state.calls.call.id));
+      await state.calls.call.hold();
+      //dispatch(callRemoved(state.calls.call, state.calls.group));
+
+      if (state.calls.callAgent != undefined) {
+        // join new meeting
+        await joinTeamsMeeting(
+          state.calls.callAgent,
+          {
+            meetingLink
+          },
+          {
+            videoOptions: {
+              localVideoStreams: state.calls.call.localVideoStreams[0] ? [state.calls.call.localVideoStreams[0]] : undefined
+            },
+            audioOptions: { muted: !state.controls.mic }
+          }
+        )
+      }
+
+      //dispatch(setca)
+      //dispatch(setMic(mic));
+    } catch (e) {
+      console.error(e);
+      // if there was an error, resume the previous call
+      await state.calls.call?.resume();
     }
   };
 };
@@ -241,13 +309,22 @@ export const registerToCallAgent = (
 
         const state = getState();
         if (state.calls.call && addedCall.direction === 'Incoming') {
-          addedCall.hangUp();
+          //addedCall.hangUp();
           return;
         }
 
         dispatch(callAdded(addedCall));
 
         addedCall.on('stateChanged', (): void => {
+          
+          if (addedCall.state == "Connected") {
+            if (state.calls.callAgent !== undefined && state.calls.leavingCallId !== '') {
+              //&& state.calls.call.id == state.calls.leavingCallId) {
+              state.calls.callAgent.calls.find((call) => call.id == state.calls.leavingCallId)?.hangUp();
+              //state.calls.call.hangUp();
+              //dispatch(setLeavingCallId(''));
+            }
+          }
           dispatch(setCallState(addedCall.state));
         });
 
@@ -279,7 +356,14 @@ export const registerToCallAgent = (
       e.removed.forEach((removedCall) => {
         const state = getState();
         if (state.calls.call && state.calls.call === removedCall) {
-          dispatch(callRemoved(removedCall, state.calls.group));
+          if (removedCall.id == state.calls.leavingCallId) {
+            console.error("Removed Call ID"+removedCall.id);
+            console.error("Leaving call id"+state.calls.leavingCallId);
+            dispatch(setLeavingCallId(''));
+          } else {
+            console.error("Removeding Call ID"+removedCall.id);
+            //dispatch(callRemoved(removedCall, state.calls.group));
+          }
           if (removedCall.callEndReason && removedCall.callEndReason.code !== 0) {
             removedCall.callEndReason && callEndedHandler(removedCall.callEndReason);
           }
@@ -336,10 +420,23 @@ export const joinGroup = async (
   }
 };
 
+export const joinTeamsMeeting = async (
+  callAgent: CallAgent,
+  meetingLink: MeetingLocator,
+  callOptions: JoinCallOptions
+): Promise<void> => {
+  try {
+    await callAgent.join(meetingLink, callOptions);
+  } catch (e) {
+    console.log('Failed to join a call', e);
+    return;
+  }
+};
+
 export const addParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
   await call.addParticipant(user);
 };
 
 export const removeParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
-  await call.removeParticipant(user).catch((e: CommunicationServicesError) => console.error(e));
+  //await call.removeParticipant(user).catch((e: CommunicationServicesError) => console.error(e));
 };

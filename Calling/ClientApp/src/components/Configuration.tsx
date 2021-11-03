@@ -24,6 +24,8 @@ import {
   verticalStackStyle
 } from './styles/Configuration.styles';
 import { AzureCommunicationTokenCredential } from '@azure/communication-common';
+import MeetingUrlField from './MeetingUrlField';
+import { User } from 'core/reducers/login';
 
 export type TokenResponse = {
   tokenCredential: AzureCommunicationTokenCredential;
@@ -31,8 +33,10 @@ export type TokenResponse = {
 };
 
 export interface ConfigurationScreenProps {
+  user: User;
   userId: string;
   groupId: string;
+  teamsMeetingUrl: string;
   callAgent: CallAgent;
   deviceManager: DeviceManager;
   setupCallClient(unsupportedStateHandler: () => void): void;
@@ -58,6 +62,7 @@ export interface ConfigurationScreenProps {
   localVideoStream: LocalVideoStream;
   screenWidth: number;
   joinGroup(callAgent: CallAgent, groupId: string): void;
+  joinTeamsMeeting(callAgent: CallAgent, meetingLink: string): void;
   getToken(): Promise<TokenResponse>;
   createCallAgent(tokenCredential: AzureCommunicationTokenCredential, displayName: string): Promise<CallAgent>;
   registerToCallEvents(
@@ -75,8 +80,8 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
 
   const [name, setName] = useState(createUserId());
   const [emptyWarning, setEmptyWarning] = useState(false);
-
-  const { groupId, setupCallClient, setGroup, unsupportedStateHandler } = props;
+  
+  const { user, groupId, setupCallClient, setGroup, unsupportedStateHandler, teamsMeetingUrl } = props;
 
   useEffect(() => {
     setupCallClient(unsupportedStateHandler);
@@ -103,7 +108,8 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
             audioDeviceList={props.audioDeviceList}
           />
           <Stack className={localSettingsContainerStyle}>
-            <DisplayNameField setName={setName} name={name} setEmptyWarning={setEmptyWarning} isEmpty={emptyWarning} />
+            {/* <DisplayNameField isDisabled={true} setName={setName} name={user.name} setEmptyWarning={setEmptyWarning} isEmpty={emptyWarning} /> */}
+            {/* <MeetingUrlField isDisabled={true} name={user.meetingUrl} setEmptyWarning={setEmptyWarning} isEmpty={emptyWarning} /> */}
             <div>
               <LocalSettings
                 videoDeviceList={props.videoDeviceList}
@@ -119,18 +125,19 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
               <PrimaryButton
                 className={buttonStyle}
                 onClick={async (): Promise<void> => {
-                  if (!name) {
+                  if (!user.name) {
                     setEmptyWarning(true);
                   } else {
                     setEmptyWarning(false);
                     //1. Retrieve a token
-                    const { tokenCredential, userId } = await props.getToken();
+                    const { tokenCredential, userId } = await props.getToken(); // call server to get user and token
                     //2. Initialize the call agent
-                    const callAgent = await props.createCallAgent(tokenCredential, name);
+                    const callAgent = await props.createCallAgent(tokenCredential, user.name);
                     //3. Register for calling events
                     props.registerToCallEvents(userId, callAgent, props.callEndedHandler);
                     //4. Join the call
-                    await props.joinGroup(callAgent, groupId);
+                    //await props.joinGroup(callAgent, groupId);
+                    await props.joinTeamsMeeting(callAgent, teamsMeetingUrl);
                     props.startCallHandler();
                     setGroup(groupId);
                   }

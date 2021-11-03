@@ -7,11 +7,13 @@ import { reducer } from './core/reducers';
 import thunk from 'redux-thunk';
 import EndCall from './components/EndCall';
 import HomeScreen from './components/HomeScreen';
+import Login from './containers/Login';
 import ConfigurationScreen from './containers/Configuration';
 import { v1 as createGUID } from 'uuid';
 import { loadTheme, initializeIcons } from '@fluentui/react';
 import { utils } from './Utils/Utils';
 import { CallEndReason } from '@azure/communication-calling';
+import SignalRProvider from "./components/signalr/SignalRProvider";
 
 const sdkVersion = require('../package.json').dependencies['@azure/communication-calling'];
 const lastUpdated = `Last Updated ${utils.getBuildTime()} with @azure/communication-calling:${sdkVersion}`;
@@ -26,6 +28,7 @@ const App = (): JSX.Element => {
   const [groupId, setGroupId] = useState('');
   const [screenWidth, setScreenWidth] = useState(0);
   const [localVideoStream, setLocalVideoStream] = useState(undefined);
+  const [userEmail, setUserEmail] = useState('');
 
   const unsupportedStateHandler = useCallback((): void => setPage('unsupported'), []);
 
@@ -44,6 +47,8 @@ const App = (): JSX.Element => {
     return urlParams.get('groupId');
   };
 
+  //const teamsMeetingUrl = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZjY3NGM5MGYtZThlZS00MGRjLTk1N2YtMjhhMjUyOGRhYTA2%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d";
+  const teamsMeetingUrl = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_NDIwYmJmNmUtZWUwZS00NTlkLWIwYzktZjk1YjkwN2M4MGQ4%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d";
   const getGroupId = (): string => {
     if (groupId) return groupId;
     const uriGid = getGroupIdFromUrl();
@@ -55,11 +60,16 @@ const App = (): JSX.Element => {
   const getContent = (): JSX.Element => {
     if (page === 'home') {
       return (
-        <HomeScreen
-          startCallHandler={(): void => {
-            window.history.pushState({}, document.title, window.location.href + '?groupId=' + getGroupId());
-          }}
-        />
+        // <Login loginHandler={(userEmail: string): void => {
+        //   setUserEmail(userEmail);
+        //   window.history.pushState({}, document.title, window.location.href + '?groupId=' + getGroupId());
+        // }} />
+        <Login loginHandler={(): void => setPage('configuration')} />
+        // <HomeScreen
+        //   startCallHandler={(): void => {
+        //     window.history.pushState({}, document.title, window.location.href + '?groupId=' + getGroupId());
+        //   }}
+        // />
       );
     } else if (page === 'configuration') {
       return (
@@ -70,6 +80,7 @@ const App = (): JSX.Element => {
             setCallEndReason(errorMsg);
             setPage('error');
           }}
+          teamsMeetingUrl={teamsMeetingUrl}
           groupId={getGroupId()}
           screenWidth={screenWidth}
           localVideoStream={localVideoStream}
@@ -131,7 +142,13 @@ const App = (): JSX.Element => {
     setPage('configuration');
   }
 
-  return <Provider store={store}>{getContent()}</Provider>;
+  return (
+    <Provider store={store}>
+      <SignalRProvider signalRUrlStr={"http://localhost:7071/api/"}>
+        {getContent()}
+      </SignalRProvider>
+    </Provider>
+  )
 };
 
 window.setTimeout(() => {

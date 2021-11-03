@@ -9,7 +9,9 @@ import {
   SET_DOMINANT_PARTICIPANTS,
   SET_PARTICIPANTS,
   CallTypes,
-  SET_CALL_AGENT
+  SET_CALL_AGENT,
+  SET_MOVE_PARTICIPANT,
+  SET_LEAVING_CALL_ID
 } from '../actions/calls';
 
 export interface CallsState {
@@ -22,6 +24,7 @@ export interface CallsState {
   remoteParticipants: RemoteParticipant[];
   attempts: number;
   dominantParticipants: SelectionState[];
+  leavingCallId: string;
 }
 
 const initialState: CallsState = {
@@ -33,7 +36,8 @@ const initialState: CallsState = {
   remoteParticipants: [],
   dominantParticipants: [],
   group: '',
-  attempts: 0
+  attempts: 0,
+  leavingCallId: ''
 };
 
 export const callsReducer: Reducer<CallsState, CallTypes> = (state = initialState, action: CallTypes): CallsState => {
@@ -58,6 +62,13 @@ export const callsReducer: Reducer<CallsState, CallTypes> = (state = initialStat
       return { ...state, remoteParticipants: action.remoteParticipants };
     case SET_GROUP:
       return { ...state, group: action.group };
+    case SET_MOVE_PARTICIPANT:
+      return {
+        ...state
+      }
+    case SET_LEAVING_CALL_ID:
+      return { ...state, leavingCallId: action.callId
+      }
     default:
       return state;
   }

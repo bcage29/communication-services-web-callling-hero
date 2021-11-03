@@ -1,5 +1,5 @@
 // © Microsoft Corporation. All rights reserved.
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Label, Overlay, Stack } from '@fluentui/react';
 import Header from '../containers/Header';
 import MediaGallery from '../containers/MediaGallery';
@@ -25,6 +25,9 @@ import {
   LocalVideoStream
 } from '@azure/communication-calling';
 import { ParticipantStream } from 'core/reducers/index.js';
+import { useSignalRContext } from "./signalr";
+import { User } from 'core/reducers/login';
+//import { setMoveParticipant } from 'core/actions/calls';
 
 export interface GroupCallProps {
   userId: string;
@@ -45,9 +48,12 @@ export interface GroupCallProps {
   shareScreen: boolean;
   setAudioDeviceInfo(deviceInfo: AudioDeviceInfo): void;
   setVideoDeviceInfo(deviceInfo: VideoDeviceInfo): void;
+  setMoveParticipant(teamsMeetingUrl: string): void;
   mute(): void;
   isGroup(): void;
   joinGroup(): void;
+  moveParticipant(): void;
+  isOnHold: boolean;
   endCallHandler(): void;
   localVideoStream: LocalVideoStream;
   setLocalVideoStream: void;
@@ -56,6 +62,42 @@ export interface GroupCallProps {
 export default (props: GroupCallProps): JSX.Element => {
   const [selectedPane, setSelectedPane] = useState(CommandPanelTypes.None);
   const activeScreenShare = props.screenShareStreams && props.screenShareStreams.length === 1;
+
+  // const updateParticipants = useCallback((data: any) => {
+  //   const a = data;
+  // });
+  // }, []);
+
+  // useEffect(() => {
+  // });
+  const {
+    isReady: isSignalRReady,
+    connection,
+    isError: isSignalRErrored,
+  } = useSignalRContext();
+
+
+  const memoizedCallback = useCallback((user: User) => {
+      props.setMoveParticipant(user.meetingUrl)
+      console.log('called');
+    },
+    [connection],
+  );
+
+  useEffect(() => {
+    if (isSignalRReady && connection !== undefined) {
+      debugger;
+      connection.startListen("newMessage", memoizedCallback);
+
+      return () => {
+        connection.stopListen("newMessage");
+      };
+    }
+
+    return () => {
+      // asdf
+    };
+  }, [connection, isSignalRReady, memoizedCallback]);
 
   return (
     <Stack horizontalAlign="center" verticalAlign="center" styles={containerStyles}>
@@ -79,7 +121,7 @@ export default (props: GroupCallProps): JSX.Element => {
                 {activeScreenShare && <MediaFullScreen activeScreenShareStream={props.screenShareStreams[0]} />}
               </Stack.Item>
               <Stack.Item grow styles={!activeScreenShare ? activeContainerClassName : hiddenContainerClassName}>
-                <MediaGallery localVideoStream={props.localVideoStream} />
+                <MediaGallery localVideoStream={props.localVideoStream} isOnHold={props.isOnHold} />
               </Stack.Item>
               {selectedPane !== CommandPanelTypes.None &&
                 (window.innerWidth > Constants.MINI_HEADER_WINDOW_WIDTH ? (

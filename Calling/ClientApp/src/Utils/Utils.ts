@@ -2,9 +2,28 @@
 import { AudioDeviceInfo, VideoDeviceInfo, RemoteVideoStream } from '@azure/communication-calling';
 import { CommunicationIdentifierKind } from '@azure/communication-common';
 import { CommunicationUserToken } from '@azure/communication-identity';
+import { User } from 'core/reducers/login';
 import preval from 'preval.macro';
 
 export const utils = {
+  getUser: async (email: string): Promise<User> => {
+    const response = await fetch('http://localhost:7071/api/users/' + email);
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error('Invalid user');
+  },
+  setUser: async (user: User): Promise<void> => {
+    const response = await fetch('http://localhost:7071/api/users/' + user.id,
+    {
+      method: "put",
+      body: JSON.stringify(user),
+    });
+    if (response.ok) {
+      return;
+    }
+    throw new Error('Invalid user');
+  },
   getAppServiceUrl: (): string => {
     return window.location.origin;
   },
