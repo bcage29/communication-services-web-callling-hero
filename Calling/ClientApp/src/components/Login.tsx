@@ -87,7 +87,6 @@ export default (props: LoginProps): JSX.Element => {
               console.log('empty false');//setEmptyWarning(false);
               //1. Retrieve a token
               const user = await props.getUser(email); // call server to get user
-              debugger;
               if (user != null || user != undefined) {
                 if (connection != undefined && connection.connection.connectionId != null) {
                   user.signalRConnectionId = connection.connection.connectionId;

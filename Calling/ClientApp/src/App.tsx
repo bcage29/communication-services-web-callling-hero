@@ -47,8 +47,6 @@ const App = (): JSX.Element => {
     return urlParams.get('groupId');
   };
 
-  //const teamsMeetingUrl = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZjY3NGM5MGYtZThlZS00MGRjLTk1N2YtMjhhMjUyOGRhYTA2%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d";
-  const teamsMeetingUrl = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_NDIwYmJmNmUtZWUwZS00NTlkLWIwYzktZjk1YjkwN2M4MGQ4%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d";
   const getGroupId = (): string => {
     if (groupId) return groupId;
     const uriGid = getGroupIdFromUrl();
@@ -80,7 +78,6 @@ const App = (): JSX.Element => {
             setCallEndReason(errorMsg);
             setPage('error');
           }}
-          teamsMeetingUrl={teamsMeetingUrl}
           groupId={getGroupId()}
           screenWidth={screenWidth}
           localVideoStream={localVideoStream}

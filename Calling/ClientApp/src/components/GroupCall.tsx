@@ -63,21 +63,13 @@ export default (props: GroupCallProps): JSX.Element => {
   const [selectedPane, setSelectedPane] = useState(CommandPanelTypes.None);
   const activeScreenShare = props.screenShareStreams && props.screenShareStreams.length === 1;
 
-  // const updateParticipants = useCallback((data: any) => {
-  //   const a = data;
-  // });
-  // }, []);
-
-  // useEffect(() => {
-  // });
   const {
     isReady: isSignalRReady,
     connection,
     isError: isSignalRErrored,
   } = useSignalRContext();
 
-
-  const memoizedCallback = useCallback((user: User) => {
+  const newMessageCallback = useCallback((user: User) => {
       props.setMoveParticipant(user.meetingUrl)
       console.log('called');
     },
@@ -86,7 +78,7 @@ export default (props: GroupCallProps): JSX.Element => {
 
   useEffect(() => {
     if (isSignalRReady && connection !== undefined) {
-      connection.startListen("newMessage", memoizedCallback);
+      connection.startListen("newMessage", newMessageCallback);
 
       return () => {
         connection.stopListen("newMessage");
@@ -96,7 +88,7 @@ export default (props: GroupCallProps): JSX.Element => {
     return () => {
       // asdf
     };
-  }, [connection, isSignalRReady, memoizedCallback]);
+  }, [connection, isSignalRReady, newMessageCallback]);
 
   return (
     <Stack horizontalAlign="center" verticalAlign="center" styles={containerStyles}>

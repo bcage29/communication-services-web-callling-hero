@@ -35,6 +35,32 @@ import RemoteStreamSelector from './RemoteStreamSelector';
 import { Constants } from './constants';
 import { setCallClient, setUserId } from './actions/sdk';
 
+
+// export const loginUser = (email: string) => {
+//   debugger;
+//   return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
+//     const state = getState();
+//     debugger;
+
+//     if (state === undefined || state.calls.call === undefined) {
+//       console.error('state or state.controls.mic is null');
+//       return;
+//     }
+
+//     try {
+//       if (!state.controls.mic) {
+//         await state.calls.call.unmute();
+//       } else {
+//         await state.calls.call.mute();
+//       }
+
+//       dispatch(setUser(mic));
+//     } catch (e) {
+//       console.error(e);
+//     }
+//   };
+// };
+
 export const setMicrophone = (mic: boolean) => {
   return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
     const state = getState();
@@ -54,6 +80,47 @@ export const setMicrophone = (mic: boolean) => {
       dispatch(setMic(mic));
     } catch (e) {
       console.error(e);
+    }
+  };
+};
+
+export const moveParticipant = (meetingLink: string) => {
+  return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
+    const state = getState();
+
+    if (state === undefined || state.calls.call === undefined) {
+      console.error('state or state.controls.mic is null');
+      return;
+    }
+
+    try {
+      // set current call to hold
+      dispatch(setLeavingCallId(state.calls.call.id));
+      await state.calls.call.hold();
+      //dispatch(callRemoved(state.calls.call, state.calls.group));
+
+      if (state.calls.callAgent != undefined) {
+        // join new meeting
+        await joinTeamsMeeting(
+          state.calls.callAgent,
+          {
+            meetingLink
+          },
+          {
+            videoOptions: {
+              localVideoStreams: state.calls.call.localVideoStreams[0] ? [state.calls.call.localVideoStreams[0]] : undefined
+            },
+            audioOptions: { muted: !state.controls.mic }
+          }
+        )
+      }
+
+      //dispatch(setca)
+      //dispatch(setMic(mic));
+    } catch (e) {
+      console.error(e);
+      // if there was an error, resume the previous call
+      await state.calls.call?.resume();
     }
   };
 };
@@ -238,29 +305,26 @@ export const registerToCallAgent = (
 
     callAgent.on('callsUpdated', (e: { added: Call[]; removed: Call[] }): void => {
       e.added.forEach((addedCall) => {
-        debugger;
         console.log(`Call added : Call Id = ${addedCall.id}`);
 
         const state = getState();
         if (state.calls.call && addedCall.direction === 'Incoming') {
-          addedCall.hangUp();
+          //addedCall.hangUp();
           return;
         }
 
         dispatch(callAdded(addedCall));
 
         addedCall.on('stateChanged', (): void => {
+          
           if (addedCall.state == "Connected") {
-            console.error('connected call: ' + addedCall.id);
-            if (state.calls.callAgent !== undefined && state.calls.leavingCallId !== ''
-              && addedCall.id != state.calls.leavingCallId) {
-              // a new call was connected and isn't the one we are leaving.
-              // now hang up the previous call
-              console.error('hanging up: ' + state.calls.leavingCallId);
+            if (state.calls.callAgent !== undefined && state.calls.leavingCallId !== '') {
+              //&& state.calls.call.id == state.calls.leavingCallId) {
               state.calls.callAgent.calls.find((call) => call.id == state.calls.leavingCallId)?.hangUp();
+              //state.calls.call.hangUp();
+              //dispatch(setLeavingCallId(''));
             }
           }
-
           dispatch(setCallState(addedCall.state));
         });
 
@@ -274,8 +338,6 @@ export const registerToCallAgent = (
 
         // if remote participants have changed, subscribe to the added remote participants
         addedCall.on('remoteParticipantsUpdated', (ev): void => {
-          debugger;
-          console.error('participant updated for call: ' + addedCall.id);
           // for each of the added remote participants, subscribe to events and then just update as well in case the update has already happened
           const state = getState();
           ev.added.forEach((addedRemoteParticipant) => {
@@ -285,8 +347,6 @@ export const registerToCallAgent = (
 
           // We don't use the actual value we are just going to reset the remoteParticipants based on the call
           if (ev.removed.length > 0) {
-            // remove participants from old call
-            const currentParticipants = state.calls.remoteParticipants;
             dispatch(setParticipants([...addedCall.remoteParticipants.values()]));
           }
         });
@@ -294,13 +354,16 @@ export const registerToCallAgent = (
         dispatch(setParticipants([...state.calls.remoteParticipants]));
       });
       e.removed.forEach((removedCall) => {
-        debugger;
         const state = getState();
         if (state.calls.call && state.calls.call === removedCall) {
           if (removedCall.id == state.calls.leavingCallId) {
+            console.error("Removed Call ID"+removedCall.id);
+            console.error("Leaving call id"+state.calls.leavingCallId);
             dispatch(setLeavingCallId(''));
-          } 
-          dispatch(callRemoved(removedCall, state.calls.group));
+          } else {
+            console.error("Removeding Call ID"+removedCall.id);
+            //dispatch(callRemoved(removedCall, state.calls.group));
+          }
           if (removedCall.callEndReason && removedCall.callEndReason.code !== 0) {
             removedCall.callEndReason && callEndedHandler(removedCall.callEndReason);
           }
@@ -365,7 +428,7 @@ export const joinTeamsMeeting = async (
   try {
     await callAgent.join(meetingLink, callOptions);
   } catch (e) {
-    console.log('Failed to join teams call', e);
+    console.log('Failed to join a call', e);
     return;
   }
 };
@@ -375,47 +438,5 @@ export const addParticipant = async (call: Call, user: CommunicationUserKind): P
 };
 
 export const removeParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
-  await call.removeParticipant(user).catch((e: CommunicationServicesError) => console.error(e));
-};
-
-export const moveParticipant = (meetingLink: string) => {
-  return async (dispatch: Dispatch, getState: () => State): Promise<void> => {
-    const state = getState();
-
-    if (state === undefined || state.calls.call === undefined) {
-      console.error('state or state.controls.mic is null');
-      return;
-    }
-
-    try {
-      
-      dispatch(setLeavingCallId(state.calls.call.id));
-      // set current call to hold
-      await state.calls.call.hold();
-      //dispatch(callRemoved(state.calls.call, state.calls.group));
-
-      if (state.calls.callAgent != undefined) {
-        // join new meeting
-        await joinTeamsMeeting(
-          state.calls.callAgent,
-          {
-            meetingLink
-          },
-          {
-            videoOptions: {
-              localVideoStreams: state.calls.call.localVideoStreams[0] ? [state.calls.call.localVideoStreams[0]] : undefined
-            },
-            audioOptions: { muted: !state.controls.mic }
-          }
-        )
-      }
-
-      //dispatch(setca)
-      //dispatch(setMic(mic));
-    } catch (e) {
-      console.error(e);
-      // if there was an error, resume the previous call
-      await state.calls.call?.resume();
-    }
-  };
+  //await call.removeParticipant(user).catch((e: CommunicationServicesError) => console.error(e));
 };

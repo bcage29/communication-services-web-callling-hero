@@ -36,7 +36,6 @@ export interface ConfigurationScreenProps {
   user: User;
   userId: string;
   groupId: string;
-  teamsMeetingUrl: string;
   callAgent: CallAgent;
   deviceManager: DeviceManager;
   setupCallClient(unsupportedStateHandler: () => void): void;
@@ -81,7 +80,7 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
   const [name, setName] = useState(createUserId());
   const [emptyWarning, setEmptyWarning] = useState(false);
   
-  const { user, groupId, setupCallClient, setGroup, unsupportedStateHandler, teamsMeetingUrl } = props;
+  const { user, groupId, setupCallClient, setGroup, unsupportedStateHandler } = props;
 
   useEffect(() => {
     setupCallClient(unsupportedStateHandler);
@@ -136,8 +135,9 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
                     //3. Register for calling events
                     props.registerToCallEvents(userId, callAgent, props.callEndedHandler);
                     //4. Join the call
-                    //await props.joinGroup(callAgent, groupId);
-                    await props.joinTeamsMeeting(callAgent, teamsMeetingUrl);
+                    //await props.joinTeamsMeeting(callAgent, user.meetingUrl);
+                    // hard coding for testing
+                    await props.joinTeamsMeeting(callAgent, "https://teams.microsoft.com/l/meetup-join/19%3ameeting_NDIwYmJmNmUtZWUwZS00NTlkLWIwYzktZjk1YjkwN2M4MGQ4%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d");
                     props.startCallHandler();
                     setGroup(groupId);
                   }
