@@ -137,7 +137,7 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
                     //4. Join the call
                     //await props.joinTeamsMeeting(callAgent, user.meetingUrl);
                     // hard coding for testing
-                    await props.joinTeamsMeeting(callAgent, "https://teams.microsoft.com/l/meetup-join/19%3ameeting_NDIwYmJmNmUtZWUwZS00NTlkLWIwYzktZjk1YjkwN2M4MGQ4%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d");
+                    await props.joinTeamsMeeting(callAgent, "https://teams.microsoft.com/l/meetup-join/19%3ameeting_YWE1NDRkNzktYTk3Mi00NzQ4LTgyMTQtNzE5OWRjNTQ1OWY2%40thread.v2/0?context=%7b%22Tid%22%3a%229bc3e81f-80ea-4a04-b5ec-06eb59a03d44%22%2c%22Oid%22%3a%228324bcf9-6ce3-49ce-a146-b69e11ccbc45%22%7d");
                     props.startCallHandler();
                     setGroup(groupId);
                   }

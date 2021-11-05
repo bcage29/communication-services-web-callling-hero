@@ -11,13 +11,15 @@ import {
   CallTypes,
   SET_CALL_AGENT,
   SET_MOVE_PARTICIPANT,
-  SET_LEAVING_CALL_ID
+  SET_LEAVING_CALL_ID,
+  MOVE_CALL_TO_SECONDARY
 } from '../actions/calls';
 
 export interface CallsState {
   callAgent?: CallAgent;
   group: string;
   call?: Call;
+  secondaryCall?: Call; //used to hold the first call while they join the next meeting
   callState: string;
   incomingCallEndReason: CallEndReason | undefined;
   groupCallEndReason: CallEndReason | undefined;
@@ -30,6 +32,7 @@ export interface CallsState {
 const initialState: CallsState = {
   callAgent: undefined,
   call: undefined,
+  secondaryCall: undefined,
   callState: 'None',
   incomingCallEndReason: undefined,
   groupCallEndReason: undefined,
@@ -66,8 +69,10 @@ export const callsReducer: Reducer<CallsState, CallTypes> = (state = initialStat
       return {
         ...state
       }
+    case MOVE_CALL_TO_SECONDARY:
+      return { ...state, call: action.call, secondaryCall: action.secondaryCall, remoteParticipants: action.remoteParticipants };
     case SET_LEAVING_CALL_ID:
-      return { ...state, leavingCallId: action.callId
+      return { ...state, leavingCallId: action.callId, secondaryCall: undefined
       }
     default:
       return state;

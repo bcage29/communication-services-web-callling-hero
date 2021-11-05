@@ -10,6 +10,7 @@ const SET_PARTICIPANTS = 'SET_PARTICIPANTS';
 const SET_DOMINANT_PARTICIPANTS = 'SET_DOMINANT_PARTICIPANTS';
 const SET_MOVE_PARTICIPANT = 'SET_MOVE_PARTICIPANT';
 const SET_LEAVING_CALL_ID = 'SET_LEAVING_CALL_ID';
+const MOVE_CALL_TO_SECONDARY = 'MOVE_CALL_TO_SECONDARY';
 
 interface SetCallAgentAction {
   type: typeof SET_CALL_AGENT;
@@ -51,6 +52,13 @@ interface SetDominantParticipantsAction {
 interface SetMoveParticipantAction {
   type: typeof SET_MOVE_PARTICIPANT;
   teamsMeetingUrl: string;
+}
+
+interface MoveCallToSecondaryAction {
+  type: typeof MOVE_CALL_TO_SECONDARY;
+  secondaryCall: Call;
+  call: Call;
+  remoteParticipants: RemoteParticipant[];
 }
 
 interface SetLeavingCallIdAction {
@@ -116,6 +124,15 @@ export const setMoveParticipant = (teamsMeetingUrl: string): SetMoveParticipantA
   };
 };
 
+export const moveCallToSecondary = (callOnHold: Call, addedCall: Call): MoveCallToSecondaryAction => {
+  return {
+    type: MOVE_CALL_TO_SECONDARY,
+    secondaryCall: callOnHold,
+    call: addedCall,
+    remoteParticipants: [...addedCall.remoteParticipants.values()]
+  };
+};
+
 export const setLeavingCallId = (callId: string): SetLeavingCallIdAction => {
   return {
     type: SET_LEAVING_CALL_ID,
@@ -134,7 +151,8 @@ export {
   SET_DOMINANT_PARTICIPANTS,
   SET_PARTICIPANTS,
   SET_MOVE_PARTICIPANT,
-  SET_LEAVING_CALL_ID
+  SET_LEAVING_CALL_ID,
+  MOVE_CALL_TO_SECONDARY
 };
 
 export type CallTypes =
@@ -146,4 +164,5 @@ export type CallTypes =
   | CallAddedAction
   | CallRemovedAction
   | SetMoveParticipantAction
-  | SetLeavingCallIdAction;
+  | SetLeavingCallIdAction
+  | MoveCallToSecondaryAction;

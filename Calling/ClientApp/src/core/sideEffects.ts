@@ -17,7 +17,7 @@ import {
 import { CommunicationUserKind } from '@azure/communication-common';
 import { Dispatch } from 'redux';
 import { utils } from '../Utils/Utils';
-import { callAdded, callRemoved, setCallState, setParticipants, setCallAgent, setLeavingCallId } from './actions/calls';
+import { callAdded, callRemoved, setCallState, setParticipants, setCallAgent, setLeavingCallId, moveCallToSecondary } from './actions/calls';
 import { setMic, setShareScreen } from './actions/controls';
 import {
   setAudioDeviceInfo,
@@ -81,13 +81,18 @@ export const setShareUnshareScreen = (shareScreen: boolean) => {
   };
 };
 
-const subscribeToParticipant = (participant: RemoteParticipant, call: Call, dispatch: Dispatch): void => {
+const subscribeToParticipant = (participant: RemoteParticipant, call: Call, dispatch: Dispatch, getState: () => State): void => {
   const dominantParticipantCount = utils.isSafari()
     ? Constants.DOMINANT_PARTICIPANTS_COUNT_SAFARI
     : Constants.DOMINANT_PARTICIPANTS_COUNT;
   const remoteStreamSelector = RemoteStreamSelector.getInstance(dominantParticipantCount, dispatch);
 
   participant.on('stateChanged', () => {
+
+    const state = getState();
+    if (call.id == state.calls.leavingCallId) {
+      return;
+    }
     remoteStreamSelector.participantStateChanged(
       utils.getId(participant.identifier),
       participant.displayName ?? '',
@@ -238,7 +243,6 @@ export const registerToCallAgent = (
 
     callAgent.on('callsUpdated', (e: { added: Call[]; removed: Call[] }): void => {
       e.added.forEach((addedCall) => {
-        debugger;
         console.log(`Call added : Call Id = ${addedCall.id}`);
 
         const state = getState();
@@ -247,24 +251,37 @@ export const registerToCallAgent = (
           return;
         }
 
-        dispatch(callAdded(addedCall));
+        // current call in progress and we initiated a new call
+        if (state.calls.call && addedCall.direction === 'Outgoing' && state.calls.leavingCallId !== '') {
+          dispatch(moveCallToSecondary(state.calls.call, addedCall))
+        } else {
+          dispatch(callAdded(addedCall));
+        }
 
         addedCall.on('stateChanged', (): void => {
+          const state = getState();
+          //console.error("PARTICIPANTS: " + state.calls.remoteParticipants.length);
           if (addedCall.state == "Connected") {
             console.error('connected call: ' + addedCall.id);
             if (state.calls.callAgent !== undefined && state.calls.leavingCallId !== ''
               && addedCall.id != state.calls.leavingCallId) {
-              // a new call was connected and isn't the one we are leaving.
-              // now hang up the previous call
-              console.error('hanging up: ' + state.calls.leavingCallId);
-              state.calls.callAgent.calls.find((call) => call.id == state.calls.leavingCallId)?.hangUp();
+
+              state.calls.secondaryCall?.off('stateChanged', (): void => {
+                // unsubscribe
+               });
+              state.calls.secondaryCall?.hangUp();
+
             }
           }
 
-          dispatch(setCallState(addedCall.state));
+          if (addedCall.id != state.calls.leavingCallId) {
+            dispatch(setCallState(addedCall.state));
+          }
         });
 
-        dispatch(setCallState(addedCall.state));
+        if (addedCall.id != state.calls.leavingCallId) {
+          dispatch(setCallState(addedCall.state));
+        }
 
         addedCall.on('isScreenSharingOnChanged', (): void => {
           dispatch(setShareScreen(addedCall.isScreenSharingOn));
@@ -274,35 +291,38 @@ export const registerToCallAgent = (
 
         // if remote participants have changed, subscribe to the added remote participants
         addedCall.on('remoteParticipantsUpdated', (ev): void => {
-          debugger;
-          console.error('participant updated for call: ' + addedCall.id);
           // for each of the added remote participants, subscribe to events and then just update as well in case the update has already happened
           const state = getState();
+          if (addedCall.id == state.calls.leavingCallId) {
+            console.error('Returning bc update is on leaving call: ' + addedCall.id);
+            return;
+          }
+          console.error('participant updated for call: ' + addedCall.id);
           ev.added.forEach((addedRemoteParticipant) => {
-            subscribeToParticipant(addedRemoteParticipant, addedCall, dispatch);
+            subscribeToParticipant(addedRemoteParticipant, addedCall, dispatch, getState);
             dispatch(setParticipants([...state.calls.remoteParticipants, addedRemoteParticipant]));
           });
 
           // We don't use the actual value we are just going to reset the remoteParticipants based on the call
           if (ev.removed.length > 0) {
-            // remove participants from old call
-            const currentParticipants = state.calls.remoteParticipants;
-            dispatch(setParticipants([...addedCall.remoteParticipants.values()]));
+            if (addedCall.id != state.calls.leavingCallId) {
+              dispatch(setParticipants([...addedCall.remoteParticipants.values()]));
+            }
           }
         });
 
         dispatch(setParticipants([...state.calls.remoteParticipants]));
       });
       e.removed.forEach((removedCall) => {
-        debugger;
         const state = getState();
         if (state.calls.call && state.calls.call === removedCall) {
           if (removedCall.id == state.calls.leavingCallId) {
             dispatch(setLeavingCallId(''));
-          } 
-          dispatch(callRemoved(removedCall, state.calls.group));
-          if (removedCall.callEndReason && removedCall.callEndReason.code !== 0) {
-            removedCall.callEndReason && callEndedHandler(removedCall.callEndReason);
+          } else {
+            dispatch(callRemoved(removedCall, state.calls.group));
+            if (removedCall.callEndReason && removedCall.callEndReason.code !== 0) {
+              removedCall.callEndReason && callEndedHandler(removedCall.callEndReason);
+            }
           }
         }
       });
@@ -371,10 +391,12 @@ export const joinTeamsMeeting = async (
 };
 
 export const addParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
+  debugger;
   await call.addParticipant(user);
 };
 
 export const removeParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
+  debugger;
   await call.removeParticipant(user).catch((e: CommunicationServicesError) => console.error(e));
 };
 
@@ -392,7 +414,6 @@ export const moveParticipant = (meetingLink: string) => {
       dispatch(setLeavingCallId(state.calls.call.id));
       // set current call to hold
       await state.calls.call.hold();
-      //dispatch(callRemoved(state.calls.call, state.calls.group));
 
       if (state.calls.callAgent != undefined) {
         // join new meeting
@@ -409,9 +430,6 @@ export const moveParticipant = (meetingLink: string) => {
           }
         )
       }
-
-      //dispatch(setca)
-      //dispatch(setMic(mic));
     } catch (e) {
       console.error(e);
       // if there was an error, resume the previous call
