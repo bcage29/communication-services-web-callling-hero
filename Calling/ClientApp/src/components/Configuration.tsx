@@ -24,8 +24,9 @@ import {
   verticalStackStyle
 } from './styles/Configuration.styles';
 import { AzureCommunicationTokenCredential } from '@azure/communication-common';
-import MeetingUrlField from './MeetingUrlField';
 import { User } from 'core/reducers/login';
+import GenericTextField from './GenericTextField';
+import GenericDisplayField from './GenericDisplayField';
 
 export type TokenResponse = {
   tokenCredential: AzureCommunicationTokenCredential;
@@ -74,11 +75,6 @@ export interface ConfigurationScreenProps {
 export default (props: ConfigurationScreenProps): JSX.Element => {
   const spinnerLabel = 'Initializing call client...';
   const buttonText = 'Start call';
-
-  const createUserId = (): string => 'user' + Math.ceil(Math.random() * 1000);
-
-  const [name, setName] = useState(createUserId());
-  const [emptyWarning, setEmptyWarning] = useState(false);
   
   const { user, groupId, setupCallClient, setGroup, unsupportedStateHandler } = props;
 
@@ -107,8 +103,12 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
             audioDeviceList={props.audioDeviceList}
           />
           <Stack className={localSettingsContainerStyle}>
-            {/* <DisplayNameField isDisabled={true} setName={setName} name={user.name} setEmptyWarning={setEmptyWarning} isEmpty={emptyWarning} /> */}
-            {/* <MeetingUrlField isDisabled={true} name={user.meetingUrl} setEmptyWarning={setEmptyWarning} isEmpty={emptyWarning} /> */}
+            <GenericDisplayField 
+              value={user !== undefined ? user.name : ''}
+              name={"Name"}
+              showLabel={true}
+              isDisabled={true}
+            />
             <div>
               <LocalSettings
                 videoDeviceList={props.videoDeviceList}
@@ -124,21 +124,16 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
               <PrimaryButton
                 className={buttonStyle}
                 onClick={async (): Promise<void> => {
-                  if (!user.name) {
-                    setEmptyWarning(true);
-                  } else {
-                    setEmptyWarning(false);
-                    //1. Retrieve a token
-                    const { tokenCredential, userId } = await props.getToken(); // call server to get user and token
-                    //2. Initialize the call agent
-                    const callAgent = await props.createCallAgent(tokenCredential, user.name);
-                    //3. Register for calling events
-                    props.registerToCallEvents(userId, callAgent, props.callEndedHandler);
-                    //4. Join the call
-                    await props.joinTeamsMeeting(callAgent, user.meetingUrl);
-                    props.startCallHandler();
-                    setGroup(groupId);
-                  }
+                  //1. Retrieve a token
+                  const { tokenCredential, userId } = await props.getToken(); // call server to get user and token
+                  //2. Initialize the call agent
+                  const callAgent = await props.createCallAgent(tokenCredential, user.name);
+                  //3. Register for calling events
+                  props.registerToCallEvents(userId, callAgent, props.callEndedHandler);
+                  //4. Join the call
+                  await props.joinTeamsMeeting(callAgent, user.meetingUrl);
+                  props.startCallHandler();
+                  setGroup(groupId);
                 }}
               >
                 <VideoCameraEmphasisIcon className={videoCameraIconStyle} size="medium" />

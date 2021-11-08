@@ -16,8 +16,8 @@ interface GenericTextFieldProps {
   isEmpty: boolean;
   isDisabled?: boolean;
   showLabel: boolean;
-  errorMessage: string;
-  hasError: boolean;
+  errorMessage?: string;
+  hasError?: boolean;
 }
 
 const TextFieldStyleProps = {
