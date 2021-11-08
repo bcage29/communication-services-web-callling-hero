@@ -20,8 +20,6 @@ export interface CommandPanelProps {
   setSelectedPane: any;
   setVideoDeviceInfo(device: VideoDeviceInfo): void;
   setAudioDeviceInfo(device: AudioDeviceInfo): void;
-  setMoveParticipant(teamsMeetingUrl: string): void;
-  moveParticipant(): void;
   deviceManager: DeviceManager;
 }
 export enum CommandPanelTypes {
@@ -44,7 +42,7 @@ export default (props: CommandPanelProps): JSX.Element => {
       )}
       {props.selectedPane === CommandPanelTypes.People && (
         <Stack.Item>
-          <Footer moveParticipant={props.setMoveParticipant} />
+          <Footer />
         </Stack.Item>
       )}
       {props.selectedPane === CommandPanelTypes.Settings && (

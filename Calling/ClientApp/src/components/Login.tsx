@@ -27,11 +27,12 @@ import {
 import { User } from 'core/reducers/login';
 import { useSignalRContext } from "./signalr";
 import { connect } from 'react-redux';
+import GenericTextField from './GenericTextField';
 
 export interface LoginProps {
   setUser(user: User): void;
   getUser(email: string): User;
-  loginHandler(): void;
+  loginHandler(userEmail: string): void;
 }
 
 const imageStyleProps: IImageStyles = {
@@ -52,11 +53,14 @@ const TextFieldStyleProps = {
 };
 
 export default (props: LoginProps): JSX.Element => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
+  const [emptyWarning, setEmptyWarning] = useState(false);
+  // const [name, setName] = useState('');
+  const [hasError, setError] = useState(false);
 
-  const handleInput = (event: any): void => {
-    setEmail(event.target.value);
-  };
+  // const handleInput = (event: any): void => {
+  //   setEmail(event.target.value);
+  // };
 
   const { isReady, connection, isError } = useSignalRContext();
 
@@ -65,26 +69,23 @@ export default (props: LoginProps): JSX.Element => {
       <Stack className={upperStackStyle} tokens={upperStackTokens}>
         <div className={headerStyle}>{"Please Log In"}</div>
         <Stack tokens={nestedStackTokens}>
-          <TextField
-            autoComplete="off"
-            inputClassName={inputBoxTextStyle}
-            ariaLabel="Enter your email address"
-            borderless={true}
-            className={inputBoxStyle}
-            onChange={handleInput}
-            id="name"
-            placeholder="Enter your email address"
-            defaultValue="brennen.cage@microsoft.com"
-            styles={TextFieldStyleProps}
+          <GenericTextField 
+            setName={setEmail} 
+            name={"Email"}
+            showLabel={false}
+            setEmptyWarning={setEmptyWarning} 
+            isEmpty={emptyWarning}
+            hasError={hasError}
+            errorMessage={"User does not have access."}
           />
         </Stack>
         <PrimaryButton
           className={buttonStyle}
           onClick={async (): Promise<void> => {
+            setError(false);
             if (!email) {
-              console.log('empty true');//setEmptyWarning(true);
+              setEmptyWarning(true);
             } else {
-              console.log('empty false');//setEmptyWarning(false);
               //1. Retrieve a token
               const user = await props.getUser(email); // call server to get user
               if (user != null || user != undefined) {
@@ -92,20 +93,17 @@ export default (props: LoginProps): JSX.Element => {
                   user.signalRConnectionId = connection.connection.connectionId;
                 }
                 props.setUser(user);
-                props.loginHandler();
+                props.loginHandler(user.id);
+              } else {
+                setError(true);
               }
             }
           }}
+          disabled={emptyWarning ? true : false}
         >
           {"LOG IN"}
         </PrimaryButton>
       </Stack>
-      {/* <Image
-        alt="Welcome to the Azure Communication Services Calling sample app"
-        className={imgStyle}
-        styles={imageStyleProps}
-        {...imageProps}
-      /> */}
     </Stack>
   );
 };

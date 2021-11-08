@@ -65,10 +65,10 @@ export const callsReducer: Reducer<CallsState, CallTypes> = (state = initialStat
       return { ...state, remoteParticipants: action.remoteParticipants };
     case SET_GROUP:
       return { ...state, group: action.group };
-    case SET_MOVE_PARTICIPANT:
-      return {
-        ...state
-      }
+    // case SET_MOVE_PARTICIPANT:
+    //   return {
+    //     ...state
+    //   }
     case MOVE_CALL_TO_SECONDARY:
       return { ...state, call: action.call, secondaryCall: action.secondaryCall, remoteParticipants: action.remoteParticipants };
     case SET_LEAVING_CALL_ID:

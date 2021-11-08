@@ -22,8 +22,6 @@ export interface EndCallProps {
 export default (props: EndCallProps): JSX.Element => {
   const goHomePage = 'Go to homepage';
   const rejoinCall = 'Rejoin call';
-  const feedbackLink =
-    'https://docs.microsoft.com/en-us/answers/search.html?c=&includeChildren=&f=&type=question+OR+idea+OR+kbentry+OR+answer+OR+topic+OR+user&redirect=search%2Fsearch&sort=relevance&q=azure-communication-services';
 
   return (
     <Stack verticalAlign="center" tokens={mainStackTokens} className={endCallContainerStyle}>
@@ -38,10 +36,6 @@ export default (props: EndCallProps): JSX.Element => {
             {goHomePage}
           </DefaultButton>
         </Stack>
-        <div className={bottomStackFooterStyle}>
-          <a href={feedbackLink}>Give Feedback</a>
-          &nbsp;on this sample app on Github
-        </div>
       </Stack>
     </Stack>
   );

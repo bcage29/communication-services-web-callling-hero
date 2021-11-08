@@ -74,7 +74,6 @@ export default (props: MediaGalleryProps): JSX.Element => {
   };
 
   const getSubstageMediaGalleryTilesForParticipants = (participants: RemoteParticipant[]): JSX.Element[] => {
-    debugger;
     const remoteParticipantsMediaGalleryItems = participants.map((participant) => (
       <div key={`${utils.getId(participant.identifier)}-tile`} className={substageMediaGalleryStyle}>
         <RemoteStreamMedia

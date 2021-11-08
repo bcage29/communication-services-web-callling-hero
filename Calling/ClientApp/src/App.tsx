@@ -58,16 +58,12 @@ const App = (): JSX.Element => {
   const getContent = (): JSX.Element => {
     if (page === 'home') {
       return (
-        // <Login loginHandler={(userEmail: string): void => {
-        //   setUserEmail(userEmail);
-        //   window.history.pushState({}, document.title, window.location.href + '?groupId=' + getGroupId());
-        // }} />
-        <Login loginHandler={(): void => setPage('configuration')} />
-        // <HomeScreen
-        //   startCallHandler={(): void => {
-        //     window.history.pushState({}, document.title, window.location.href + '?groupId=' + getGroupId());
-        //   }}
-        // />
+        <Login 
+          loginHandler={(userEmail: string): void => {
+            setUserEmail(userEmail)
+            setPage('configuration')
+          }} 
+        />
       );
     } else if (page === 'configuration') {
       return (
@@ -141,7 +137,7 @@ const App = (): JSX.Element => {
 
   return (
     <Provider store={store}>
-      <SignalRProvider signalRUrlStr={"http://localhost:7071/api/"}>
+      <SignalRProvider signalRUrlStr={"http://localhost:7071/api/"} userEmail={userEmail}>
         {getContent()}
       </SignalRProvider>
     </Provider>

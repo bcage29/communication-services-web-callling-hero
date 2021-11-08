@@ -49,11 +49,6 @@ interface SetDominantParticipantsAction {
   dominantParticipants: SelectionState[];
 }
 
-interface SetMoveParticipantAction {
-  type: typeof SET_MOVE_PARTICIPANT;
-  teamsMeetingUrl: string;
-}
-
 interface MoveCallToSecondaryAction {
   type: typeof MOVE_CALL_TO_SECONDARY;
   secondaryCall: Call;
@@ -117,13 +112,6 @@ export const setDominantParticipants = (selected: SelectionState[]): SetDominant
   };
 };
 
-export const setMoveParticipant = (teamsMeetingUrl: string): SetMoveParticipantAction => {
-  return {
-    type: SET_MOVE_PARTICIPANT,
-    teamsMeetingUrl: teamsMeetingUrl
-  };
-};
-
 export const moveCallToSecondary = (callOnHold: Call, addedCall: Call): MoveCallToSecondaryAction => {
   return {
     type: MOVE_CALL_TO_SECONDARY,
@@ -163,6 +151,6 @@ export type CallTypes =
   | SetGroupAction
   | CallAddedAction
   | CallRemovedAction
-  | SetMoveParticipantAction
+  //| SetMoveParticipantAction
   | SetLeavingCallIdAction
   | MoveCallToSecondaryAction;

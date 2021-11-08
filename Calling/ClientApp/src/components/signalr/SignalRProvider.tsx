@@ -4,6 +4,7 @@ import { SignalRContext } from "./SignalRContext";
 
 interface SignalRProviderProps {
   signalRUrlStr?: string;
+  userEmail: string;
   children: any;
 }
 
@@ -12,20 +13,20 @@ export default (props: SignalRProviderProps): JSX.Element => {
   const [isError, setIsError] = useState(false);
   const [connection, setConnection] = useState<SignalRConnection>();
 
-  const { signalRUrlStr, children } = props;
+  const { signalRUrlStr, userEmail, children } = props;
 
   useEffect(() => {
-    if (signalRUrlStr !== undefined) {
-      const connect = new SignalRConnection(signalRUrlStr);
+    if (signalRUrlStr !== undefined && userEmail !== '') {
+      const connect = new SignalRConnection(signalRUrlStr, userEmail);
       setConnection(connect);
     }
-  }, [signalRUrlStr]);
+  }, [signalRUrlStr, userEmail]);
 
   useEffect(() => {
     if (connection) {
       connection
         .connect()
-        .then((d) => {
+        .then(() => {
           setIsReady(true);
         })
         .catch(() => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Stack, Icon, PrimaryButton, TextField, Separator } from '@fluentui/react';
 import {
   paneFooterStyles,
@@ -9,35 +9,23 @@ import {
   copyIconStyle
 } from './styles/CommandPanel.styles';
 
-const invitePeopleString = 'Move User to new meeting';
-const copyJoinInfoString = 'Join new meeting';
+const invitePeopleString = 'Invite people to join';
+const copyJoinInfoString = 'Copy join info';
 
-// const copyJoinLink = (): void => {
-//   const inputElement = document.getElementById('inputText') as HTMLInputElement;
-//   inputElement.select();
-//   document.execCommand('copy');
-// };
+const copyJoinLink = (): void => {
+  const inputElement = document.getElementById('inputText') as HTMLInputElement;
+  inputElement.select();
+  document.execCommand('copy');
+};
 
-export interface MoveParticipantProps {
-  moveParticipant(teamsMeetingUrl: string): void;
-}
-
-//export default (): JSX.Element => {
-export default (props: MoveParticipantProps): JSX.Element => {
-
-  const [name, setName] = useState(" ");
-
-  const handleInput = (event: any): void => {
-    setName(event.target.value);
-  };
-
+export default (): JSX.Element => {
   return (
     <Stack styles={paneFooterStyles} tokens={paneFooterTokens}>
       <Separator />
       <div className={footerMainTextStyle}>{invitePeopleString}</div>
-      {/* <TextField styles={textFieldStyles} id="inputText" type="text" value={`${document.baseURI}`}></TextField> */}
-      <TextField onChange={handleInput} id="inputText" type="text"></TextField>
-      <PrimaryButton className={copyLinkButtonStyle} onClick={() => props.moveParticipant(name)}>
+      <TextField styles={textFieldStyles} id="inputText" type="text" value={`${document.baseURI}`}></TextField>
+      <PrimaryButton className={copyLinkButtonStyle} onClick={copyJoinLink}>
+        <Icon iconName="Copy" className={copyIconStyle} />
         {copyJoinInfoString}
       </PrimaryButton>
     </Stack>

@@ -391,12 +391,10 @@ export const joinTeamsMeeting = async (
 };
 
 export const addParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
-  debugger;
   await call.addParticipant(user);
 };
 
 export const removeParticipant = async (call: Call, user: CommunicationUserKind): Promise<void> => {
-  debugger;
   await call.removeParticipant(user).catch((e: CommunicationServicesError) => console.error(e));
 };
 

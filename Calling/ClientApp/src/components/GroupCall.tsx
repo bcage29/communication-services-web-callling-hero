@@ -27,7 +27,6 @@ import {
 import { ParticipantStream } from 'core/reducers/index.js';
 import { useSignalRContext } from "./signalr";
 import { User } from 'core/reducers/login';
-//import { setMoveParticipant } from 'core/actions/calls';
 
 export interface GroupCallProps {
   userId: string;
@@ -86,7 +85,7 @@ export default (props: GroupCallProps): JSX.Element => {
     }
 
     return () => {
-      // asdf
+      // empty
     };
   }, [connection, isSignalRReady, newMessageCallback]);
 

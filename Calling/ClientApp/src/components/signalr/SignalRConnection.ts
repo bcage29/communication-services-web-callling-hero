@@ -7,14 +7,10 @@ import {
 export default class SignalRConnection {
   public readonly connection: HubConnection;
 
-  private readonly signalRUrlStr: string;
-
-  constructor(signalRUrlStr: string) {
-    this.signalRUrlStr = signalRUrlStr;
-
+  constructor(signalRUrlStr: string, email: string) {
     this.connection = new HubConnectionBuilder()
       .withUrl(signalRUrlStr, {
-        headers: { "x-ms-signalr-user-id": "brennen.cage@microsoft.com"},
+        headers: { "x-ms-signalr-user-id": email},
         withCredentials: false
       })
       .withAutomaticReconnect()
@@ -35,36 +31,6 @@ export default class SignalRConnection {
     }
 
     return Promise.resolve();
-  }
-
-  async subscribeToCaseNotifications(caseId: string) {
-    return this.sendSubscriptionRequest('subscribe', caseId);
-  }
-
-  async unsubscribeToCaseNotifications(caseId: string) {
-    return this.sendSubscriptionRequest('unsubscribe', caseId);
-  }
-
-  private async sendSubscriptionRequest(
-    action: 'subscribe' | 'unsubscribe',
-    caseId: string,
-  ) {
-    if (this.connection.connectionId !== undefined) {
-      const response = await fetch(
-        `${this.signalRUrlStr}/cases/${caseId}/${action}`,
-        {
-          method: 'POST',
-          headers: { user: "asdf" },
-          body: JSON.stringify({ connectionId: this.connection.connectionId }),
-        },
-      );
-
-      if (response.ok === false) {
-        throw new Error(
-          `Unable to ${action} to notifications from case ID ${caseId}`,
-        );
-      }
-    }
   }
 
   startListen<T>(target: string, handler: (payload: T) => void) {
