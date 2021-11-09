@@ -260,9 +260,8 @@ export const registerToCallAgent = (
 
         addedCall.on('stateChanged', (): void => {
           const state = getState();
-          //console.error("PARTICIPANTS: " + state.calls.remoteParticipants.length);
           if (addedCall.state == "Connected") {
-            console.error('connected call: ' + addedCall.id);
+            console.log('connected call: ' + addedCall.id);
             if (state.calls.callAgent !== undefined && state.calls.leavingCallId !== ''
               && addedCall.id != state.calls.leavingCallId) {
 
@@ -294,10 +293,10 @@ export const registerToCallAgent = (
           // for each of the added remote participants, subscribe to events and then just update as well in case the update has already happened
           const state = getState();
           if (addedCall.id == state.calls.leavingCallId) {
-            console.error('Returning bc update is on leaving call: ' + addedCall.id);
+            console.log('Returning bc update is on leaving call: ' + addedCall.id);
             return;
           }
-          console.error('participant updated for call: ' + addedCall.id);
+          console.log('participant updated for call: ' + addedCall.id);
           ev.added.forEach((addedRemoteParticipant) => {
             subscribeToParticipant(addedRemoteParticipant, addedCall, dispatch, getState);
             dispatch(setParticipants([...state.calls.remoteParticipants, addedRemoteParticipant]));

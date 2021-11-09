@@ -46,6 +46,7 @@ export interface ConfigurationScreenProps {
     afterSetupHandler: (callAgent: CallAgent, groupId: string) => void
   ): void;
   setGroup(groupId: string): void;
+  setUser(user: User): void;
   startCallHandler(): void;
   unsupportedStateHandler: () => void;
   callEndedHandler: (reason: CallEndReason) => void;
@@ -134,6 +135,8 @@ export default (props: ConfigurationScreenProps): JSX.Element => {
                   await props.joinTeamsMeeting(callAgent, user.meetingUrl);
                   props.startCallHandler();
                   setGroup(groupId);
+                  user.acsUserId = userId;
+                  props.setUser(user);
                 }}
               >
                 <VideoCameraEmphasisIcon className={videoCameraIconStyle} size="medium" />

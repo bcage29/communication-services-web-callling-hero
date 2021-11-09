@@ -16,6 +16,8 @@ import { CommunicationUserToken } from '@azure/communication-identity';
 import { utils } from 'Utils/Utils';
 import { AzureCommunicationTokenCredential } from '@azure/communication-common';
 import { setUserId } from 'core/actions/sdk';
+import { User } from 'core/reducers/login';
+import { setUser } from 'core/actions/login';
 
 const mapStateToProps = (state: State, props: ConfigurationScreenProps) => ({
   user: state.login.user,
@@ -108,7 +110,11 @@ const mapDispatchToProps = (dispatch: any) => ({
     dispatch(registerToCallAgent(userId, callAgent, endCallHandler));
   },
   setGroup: (groupId: string): void => dispatch(setGroup(groupId)),
-  updateDevices: (): void => dispatch(updateDevices())
+  updateDevices: (): void => dispatch(updateDevices()),
+  setUser: async (user: User): Promise<void> => {
+    await utils.setUser(user);
+    dispatch(setUser(user))
+  }
 });
 
 const connector: any = connect(mapStateToProps, mapDispatchToProps);

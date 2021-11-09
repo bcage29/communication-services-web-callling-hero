@@ -6,9 +6,8 @@ import Login, { LoginProps } from '../components/Login';
 import { State } from '../core/reducers';
 
 const mapStateToProps = (state: State, props: LoginProps) => ({
-  //user: state.login.user,
-  getUser: async (email: string): Promise<User> => {
-    const user: User = await utils.getUser(email);
+  getUser: async (email: string): Promise<User | undefined> => {
+    const user: User | undefined = await utils.getUser(email);
     return user;
   },
 });

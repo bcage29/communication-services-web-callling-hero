@@ -55,14 +55,9 @@ const TextFieldStyleProps = {
 export default (props: LoginProps): JSX.Element => {
   const [email, setEmail] = useState('');
   const [emptyWarning, setEmptyWarning] = useState(false);
-  // const [name, setName] = useState('');
   const [hasError, setError] = useState(false);
 
-  // const handleInput = (event: any): void => {
-  //   setEmail(event.target.value);
-  // };
-
-  const { isReady, connection, isError } = useSignalRContext();
+  const { connection } = useSignalRContext();
 
   return (
     <Stack horizontal horizontalAlign="center" verticalAlign="center" tokens={containerTokens}>
@@ -89,9 +84,6 @@ export default (props: LoginProps): JSX.Element => {
               //1. Retrieve a token
               const user = await props.getUser(email); // call server to get user
               if (user != null || user != undefined) {
-                if (connection != undefined && connection.connection.connectionId != null) {
-                  user.signalRConnectionId = connection.connection.connectionId;
-                }
                 props.setUser(user);
                 props.loginHandler(user.id);
               } else {

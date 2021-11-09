@@ -6,7 +6,6 @@ import { Provider } from 'react-redux';
 import { reducer } from './core/reducers';
 import thunk from 'redux-thunk';
 import EndCall from './components/EndCall';
-import HomeScreen from './components/HomeScreen';
 import Login from './containers/Login';
 import ConfigurationScreen from './containers/Configuration';
 import { v1 as createGUID } from 'uuid';
@@ -17,6 +16,7 @@ import SignalRProvider from "./components/signalr/SignalRProvider";
 
 const sdkVersion = require('../package.json').dependencies['@azure/communication-calling'];
 const lastUpdated = `Last Updated ${utils.getBuildTime()} with @azure/communication-calling:${sdkVersion}`;
+const SignalRUrl = 'http://localhost:7071/api/';
 
 loadTheme({});
 initializeIcons();
@@ -137,7 +137,7 @@ const App = (): JSX.Element => {
 
   return (
     <Provider store={store}>
-      <SignalRProvider signalRUrlStr={"http://localhost:7071/api/"} userEmail={userEmail}>
+      <SignalRProvider signalRUrlStr={SignalRUrl} userEmail={userEmail}>
         {getContent()}
       </SignalRProvider>
     </Provider>

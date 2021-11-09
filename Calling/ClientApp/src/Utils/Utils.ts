@@ -7,11 +7,15 @@ import preval from 'preval.macro';
 
 export const utils = {
   getUser: async (email: string): Promise<User | undefined> => {
-    const response = await fetch('http://localhost:7071/api/users/' + email);
-    if (response.ok) {
-      return response.json();
-    }
-    return undefined;
+    return await fetch('http://localhost:7071/api/users/' + email)
+    .then((response: any) => {
+      if (response.ok) {
+        return response.json();
+      }
+    })
+    .catch(error => {
+      return undefined;
+    });
   },
   setUser: async (user: User): Promise<void> => {
     const response = await fetch('http://localhost:7071/api/users/' + user.id,

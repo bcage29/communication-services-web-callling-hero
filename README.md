@@ -13,6 +13,24 @@ products:
 
 # Group Calling Sample
 
+## Changes
+
+This sample has been modified to show how the client can receive messages with SignalR to leave their current meeting and join a new Teams meeting. This sample also introduces a 'Login' screen where the user needs to enter their email address. The 'LOG IN' button sends the email address to an Azure Function ('/api/users/{email}') and this will look up the user in a CosmosDB collection. The user object returned from CosmosDB is shown below.
+
+```javascript
+{
+    "id": "matthew.smith@noname.com", // partitionKey /id
+    "name": "Matthew Smith",
+    "acsUserId": null,
+    "meetingUrl": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_XXXXX%40thread.v2/0?context=%7b%22Tid%22%xxxxx",
+    "meetingName": "Smith vs Williams"
+}
+```
+After logging in, the client app will request an acess token for SignalR ('/api/negotiate') using the email address from the Login screen as the SignalR user Id. The app will also create an ACS user and request a token for that user (UserTokenController). That code was already in the Communications Services Web Calling Hero sample and has not moved.
+
+**NOTE** This sample is using the Azure SignalR Service in serverless mode.
+
+
 This is a sample application to show how the Azure Communication Services Calling Web SDK can be used to build a group calling experience.
 The client-side application is a React based user interface which uses Redux for handling complex state while leveraging Microsoft Fluent UI.
 Powering this front-end is a C# web application powered by ASP.NET Core to connect this application with Azure Communication Services.
