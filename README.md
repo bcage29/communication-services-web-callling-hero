@@ -40,8 +40,9 @@ curl --location --request PUT 'http://localhost:7071/api/users/{email}/transfer'
 
 The Azure Function to use in conjunction with this sample can be found [here](https://github.com/bcage29/SignalRAcsFunctionApp).
 
-**NOTE** This sample is using the Azure SignalR Service in serverless mode.
+**NOTE**: This sample is using the Azure SignalR Service in serverless mode.
 
+## End Changes
 
 This is a sample application to show how the Azure Communication Services Calling Web SDK can be used to build a group calling experience.
 The client-side application is a React based user interface which uses Redux for handling complex state while leveraging Microsoft Fluent UI.
