@@ -28,6 +28,18 @@ This sample has been modified to show how the client can receive messages with S
 ```
 After logging in, the client app will request an acess token for SignalR ('/api/negotiate') using the email address from the Login screen as the SignalR user Id. The app will also create an ACS user and request a token for that user (UserTokenController). That code was already in the Communications Services Web Calling Hero sample and has not moved.
 
+The 'Start Call' button will join the user to the Teams meeting that was stored in CosmosDB. To transfer the user to a new meeting, create a PUT request to the Azure Function ('/api/users/{email}/transfer') with the new meetingUrl as the body of the request.
+
+```
+curl --location --request PUT 'http://localhost:7071/api/users/{email}/transfer' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "meetingUrl": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_YYYYYY%40thread.v2/0?context=%7b%22Tid%22%yyyyy"
+}'
+```
+
+The Azure Function to use in conjunction with this sample can be found [here](https://github.com/bcage29/SignalRAcsFunctionApp).
+
 **NOTE** This sample is using the Azure SignalR Service in serverless mode.
 
 
